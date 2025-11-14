@@ -1,4 +1,4 @@
-name: CI - API divergence + generated tests (no heredoc)
+name: CI - API divergence + generated tests
 
 on:
   workflow_dispatch: {}
@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
@@ -51,17 +53,35 @@ jobs:
           npm install newman newman-reporter-html
         shell: bash
 
-      - name: Debug: run script listing routes (no inline code)
+      - name: Debug: list discovered routes (script)
         run: |
           echo "Running scripts/debug_routes.py (SOURCE_DIR=${SOURCE_DIR})"
           if [ -f scripts/debug_routes.py ]; then
             python3 scripts/debug_routes.py || true
           else
-            echo "scripts/debug_routes.py missing; skipping debug."
+            echo "scripts/debug_routes.py missing; skipping debug (you can create it to print routes)"
           fi
         shell: bash
 
-      - name: Run CI runner (generate collection)
+      # Optionally start the backend inside the runner (uncomment block below if you want tests to run against a local server).
+      # If you run the server here you should set BASE_URL to http://127.0.0.1:5000 in repo secrets or adjust accordingly.
+      #
+      # - name: Start backend (optional, comment out if using external BASE_URL)
+      #   run: |
+      #     python3 -m pip install -r requirements.txt || true
+      #     nohup python3 backend/sample_src_app.py > backend.log 2>&1 &
+      #     # wait until server responds
+      #     for i in $(seq 1 12); do
+      #       if curl -sS http://127.0.0.1:5000/ >/dev/null 2>&1; then
+      #         echo "server up"
+      #         break
+      #       fi
+      #       echo "waiting for server..."
+      #       sleep 5
+      #     done
+      #   shell: bash
+
+      - name: Run CI runner (generate collection & divergences)
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -76,27 +96,30 @@ jobs:
           echo "Contents of ${OUTPUT_DIR}:"
           ls -la "${OUTPUT_DIR}" || true
           if [ -f "${OUTPUT_DIR}/postman_collection.json" ]; then
-            echo "postman_collection.json present"
+            echo "postman_collection.json preview (first 60 lines):"
             head -n 60 "${OUTPUT_DIR}/postman_collection.json" || true
+          else
+            echo "postman_collection.json not found"
           fi
         shell: bash
 
-      - name: Run newman on generated collection (uses local npx)
+      - name: Run newman on generated collection
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
         run: |
           COLLECTION="${OUTPUT_DIR}/postman_collection.json"
           mkdir -p newman-reports
           if [ -f "$COLLECTION" ]; then
+            # use locally installed newman via npx
             npx newman run "$COLLECTION" --env-var "base_url=${BASE_URL}" \
               --reporters cli,html,junit --reporter-junit-export newman-reports/junit.xml --reporter-html-export newman-reports/report.html || true
           else
-            echo "No collection at $COLLECTION; skipping newman."
+            echo "No collection found at $COLLECTION — skipping newman"
           fi
           ls -la newman-reports || true
         shell: bash
 
-      - name: Upload artifacts
+      - name: Upload artifacts (postman collection, divergence report, newman reports)
         uses: actions/upload-artifact@v4
         with:
           name: api-test-artifacts
