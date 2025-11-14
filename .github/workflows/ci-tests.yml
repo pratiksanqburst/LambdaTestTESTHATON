@@ -1,5 +1,3 @@
-mkdir -p .github/workflows
-cat > .github/workflows/ci-tests.yml <<'YAML'
 name: CI - API divergence + generated tests (no heredoc)
 
 on:
@@ -107,4 +105,3 @@ jobs:
             output/divergence_report.json
             output/llm_error.log
             newman-reports/**
-YAML
