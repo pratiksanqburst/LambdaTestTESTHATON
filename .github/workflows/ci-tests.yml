@@ -1,11 +1,11 @@
-name: CI - API divergence + generated tests
+name: CI - API divergence + generated tests (no inline Python)
 
 on:
   workflow_dispatch: {}
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 permissions:
   contents: read
@@ -22,6 +22,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      # Ensure Python can import local `src` package
+      - name: Add workspace to PYTHONPATH
+        run: echo "PYTHONPATH=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
@@ -53,24 +57,57 @@ jobs:
           npm install newman newman-reporter-html
         shell: bash
 
-      - name: Debug list discovered routes (script)
+      - name: Debug: list discovered routes (script)
+        # script should exist at scripts/debug_routes.py and import src.* modules
         run: |
           echo "Running scripts/debug_routes.py (SOURCE_DIR=${SOURCE_DIR})"
           if [ -f scripts/debug_routes.py ]; then
-            python3 scripts/debug_routes.py || true
+            python3 -u scripts/debug_routes.py || true
           else
-            echo "scripts/debug_routes.py missing; skipping debug (you can create it to print routes)"
+            echo "scripts/debug_routes.py missing; skipping debug"
           fi
         shell: bash
 
-      # Optionally start the backend inside the runner (uncomment block below if you want tests to run against a local server).
-      # If you run the server here you should set BASE_URL to http://127.0.0.1:5000 in repo secrets or adjust accordingly.
-      #
-      # - name: Start backend (optional, comment out if using external BASE_URL)
+      - name: Debug LLM secrets & gateway (shell-only, no python)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          QBURST_GATEWAY: ${{ secrets.QBURST_GATEWAY }}
+        run: |
+          echo "DEBUG: masked view of secrets & gateway (shell-only)"
+
+          if [ -n "$OPENAI_API_KEY" ]; then
+            prefix="${OPENAI_API_KEY:0:6}"
+            len=$(printf '%s' "$OPENAI_API_KEY" | wc -c)
+            echo "OPENAI_API_KEY present - prefix='${prefix}...' length=${len}"
+          else
+            echo "OPENAI_API_KEY not present"
+          fi
+
+          if [ -n "$QBURST_GATEWAY" ]; then
+            gwlen=$(printf '%s' "$QBURST_GATEWAY" | wc -c)
+            echo "QBURST_GATEWAY length=${gwlen}"
+            echo "QBURST_GATEWAY hex (hexdump -C first 64 bytes):"
+            printf '%s' "$QBURST_GATEWAY" | head -c 64 | hexdump -C -v || true
+            echo "QBURST_GATEWAY displayed (raw):"
+            printf '%s\n' "$QBURST_GATEWAY" || true
+          else
+            echo "QBURST_GATEWAY not present"
+          fi
+
+          # quick network check (HEAD request); will print response headers or an error
+          if command -v curl >/dev/null 2>&1; then
+            echo "curl -I to gateway (first 12 lines):"
+            curl -sS -I --max-time 8 "$QBURST_GATEWAY" 2>&1 | sed -n '1,12p' || echo "curl failed (network or invalid URL)"
+          else
+            echo "curl not installed on runner"
+          fi
+        shell: bash
+
+      # optionally start backend in-runner (uncomment if you need local server)
+      # - name: Start backend (optional)
       #   run: |
       #     python3 -m pip install -r requirements.txt || true
       #     nohup python3 backend/sample_src_app.py > backend.log 2>&1 &
-      #     # wait until server responds
       #     for i in $(seq 1 12); do
       #       if curl -sS http://127.0.0.1:5000/ >/dev/null 2>&1; then
       #         echo "server up"
@@ -88,7 +125,8 @@ jobs:
           QBURST_GATEWAY: ${{ secrets.QBURST_GATEWAY }}
         run: |
           mkdir -p "${OUTPUT_DIR}"
-          python3 ci_runner.py --source-dir "${SOURCE_DIR}" --use-llm --gateway-url "${QBURST_GATEWAY}" --output-dir "${OUTPUT_DIR}"
+          # unbuffered for real-time logs
+          python3 -u ci_runner.py --source-dir "${SOURCE_DIR}" --use-llm --gateway-url "${QBURST_GATEWAY}" --output-dir "${OUTPUT_DIR}"
         shell: bash
 
       - name: Show generated output files
@@ -96,8 +134,8 @@ jobs:
           echo "Contents of ${OUTPUT_DIR}:"
           ls -la "${OUTPUT_DIR}" || true
           if [ -f "${OUTPUT_DIR}/postman_collection.json" ]; then
-            echo "postman_collection.json preview (first 60 lines):"
-            head -n 60 "${OUTPUT_DIR}/postman_collection.json" || true
+            echo "postman_collection.json preview (first 120 lines):"
+            head -n 120 "${OUTPUT_DIR}/postman_collection.json" || true
           else
             echo "postman_collection.json not found"
           fi
