@@ -55,18 +55,19 @@ jobs:
         run: |
           echo "Scanning $SOURCE_DIR for routes..."
           python3 - <<'PY'
-          import os
-          from src.source_parser import extract_routes_from_project
+import os
+from src.source_parser import extract_routes_from_project
 
-          source_dir = os.environ.get("SOURCE_DIR", "backend")
-          routes = extract_routes_from_project(source_dir)
-          if not routes:
-              print("No routes discovered in folder:", source_dir)
-          else:
-              print("===== ROUTES DISCOVERED =====")
-              for r, info in routes.items():
-                  print(f"{r}  <-- from file: {info.get('source')}")
-          PY
+source_dir = os.environ.get("SOURCE_DIR", "backend")
+routes = extract_routes_from_project(source_dir)
+
+if not routes:
+    print("No routes discovered in folder:", source_dir)
+else:
+    print("===== ROUTES DISCOVERED =====")
+    for r, info in routes.items():
+        print(f"{r}  <-- from file: {info.get('source')}")
+PY
 
       - name: Run CI runner (generate collection)
         env:
