@@ -206,7 +206,7 @@ def _call_llm_generate(swagger: Dict[str, Any], divergences: List[Dict[str, Any]
             if gateway_url:
                 openai.api_base = gateway_url
             openai.api_key = api_key
-            resp = openai.ChatCompletion.create(
+            resp = client.chat.completions.create(
                 model=model,
                 messages=[
                     {"role": "system", "content": system_prompt},
