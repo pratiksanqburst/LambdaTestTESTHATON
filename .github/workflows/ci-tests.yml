@@ -57,7 +57,7 @@ jobs:
           npm install newman newman-reporter-html
         shell: bash
 
-      - name: Debug: list discovered routes (script)
+      - name: Debug list discovered routes (script)
         # script should exist at scripts/debug_routes.py and import src.* modules
         run: |
           echo "Running scripts/debug_routes.py (SOURCE_DIR=${SOURCE_DIR})"
