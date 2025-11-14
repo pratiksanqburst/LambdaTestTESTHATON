@@ -53,21 +53,8 @@ jobs:
 
       - name: Debug: show which files will be scanned & discovered routes
         run: |
-          echo "Scanning $SOURCE_DIR for routes..."
-          python3 - <<'PY'
-import os
-from src.source_parser import extract_routes_from_project
-
-source_dir = os.environ.get("SOURCE_DIR", "backend")
-routes = extract_routes_from_project(source_dir)
-
-if not routes:
-    print("No routes discovered in folder:", source_dir)
-else:
-    print("===== ROUTES DISCOVERED =====")
-    for r, info in routes.items():
-        print(f"{r}  <-- from file: {info.get('source')}")
-PY
+          echo "Running debug script to list routes in $SOURCE_DIR"
+          python3 scripts/debug_routes.py
 
       - name: Run CI runner (generate collection)
         env:
