@@ -14,6 +14,9 @@ def create_item():
         return jsonify({'error':'bad'}), 400
     return jsonify({'id':1, 'name': data['name']}), 201
 
+@app.route('/items/<int:item_id>', methods=['GET'])
+def get_item(item_id):
+    return jsonify({'id': item_id, 'name': 'x'}), 200
 
 @app.route('/items/<int:item_id>', methods=['GET'])
 def get_item(item_id):
