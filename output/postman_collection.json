@@ -1,7 +1,7 @@
 {
   "info": {
-    "_postman_id": "12345",
-    "name": "Sample API Test Collection",
+    "_postman_id": "12345-67890-abcdef",
+    "name": "Sample API Tests",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -14,7 +14,7 @@
             "method": "GET",
             "header": [],
             "url": "{{base_url}}/items/1",
-            "description": "Test to get an existing item."
+            "description": "Test to get an item by ID."
           },
           "response": []
         },
@@ -24,7 +24,7 @@
             "method": "GET",
             "header": [],
             "url": "{{base_url}}/items/9999",
-            "description": "Test to get a non-existing item."
+            "description": "Test to get an item that does not exist."
           },
           "response": []
         },
@@ -34,7 +34,7 @@
             "method": "GET",
             "header": [],
             "url": "{{base_url}}/items/1",
-            "description": "Test to verify the missing endpoint issue."
+            "description": "Test to confirm the endpoint is missing in the source code."
           },
           "response": []
         }
@@ -53,11 +53,11 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/items",
             "body": {
               "mode": "raw",
               "raw": "{\"name\": \"New Item\"}"
             },
+            "url": "{{base_url}}/items",
             "description": "Test to create a new item with valid schema."
           },
           "response": []
@@ -72,17 +72,17 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/items",
             "body": {
               "mode": "raw",
               "raw": "{}"
             },
+            "url": "{{base_url}}/items",
             "description": "Test to create an item without the required 'name' field."
           },
           "response": []
         },
         {
-          "name": "Divergence Test - Schema Validation Issue",
+          "name": "Divergence Test - Invalid Schema",
           "request": {
             "method": "POST",
             "header": [
@@ -91,12 +91,12 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/items",
             "body": {
               "mode": "raw",
               "raw": "{\"name\": 123}"
             },
-            "description": "Test to create an item with invalid schema."
+            "url": "{{base_url}}/items",
+            "description": "Test to create an item with an invalid schema (name is not a string)."
           },
           "response": []
         }
@@ -126,17 +126,17 @@
               }
             ],
             "url": "{{base_url}}/items",
-            "description": "Test to list items with invalid authorization."
+            "description": "Test to list items with unauthorized access."
           },
           "response": []
         },
         {
-          "name": "Divergence Test - Extra Response 201",
+          "name": "Divergence Test - Check Extra Response 201",
           "request": {
             "method": "GET",
             "header": [],
             "url": "{{base_url}}/items",
-            "description": "Test to verify the extra response code 201."
+            "description": "Test to confirm if the response includes an unexpected 201 status."
           },
           "response": []
         }
@@ -151,7 +151,7 @@
             "method": "GET",
             "header": [],
             "url": "{{base_url}}/items/1",
-            "description": "Test to get an item by ID."
+            "description": "Test to get an item by ID using an extra route."
           },
           "response": []
         },
@@ -161,17 +161,17 @@
             "method": "GET",
             "header": [],
             "url": "{{base_url}}/items/abc",
-            "description": "Test to get an item with invalid ID format."
+            "description": "Test to get an item with an invalid ID format."
           },
           "response": []
         },
         {
-          "name": "Divergence Test - Extra Route Verification",
+          "name": "Divergence Test - Test Extra Route",
           "request": {
             "method": "GET",
             "header": [],
             "url": "{{base_url}}/items/1",
-            "description": "Test to verify the existence of an extra route."
+            "description": "Test to confirm the behavior of the extra route not defined in Swagger."
           },
           "response": []
         }

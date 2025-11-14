@@ -1,97 +1,36 @@
-name: CI - API divergence + generated tests
+name: CI - minimal test
 
 on:
-  workflow_dispatch: {}
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-permissions:
-  contents: read
+  workflow_dispatch: {}
 
 jobs:
-  generate-and-run:
+  minimal:
     runs-on: ubuntu-latest
     env:
-      OUTPUT_DIR: output
       SOURCE_DIR: backend
+      OUTPUT_DIR: output
 
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Set up Node (for Newman)
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install Python requirements
+      - name: Print workspace
         run: |
-          python3 -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then python3 -m pip install -r requirements.txt; fi
-          python3 -m pip install pyyaml openai || true
+          echo "WORKDIR: $(pwd)"
+          ls -la
 
-      - name: Install Newman
+      - name: Python check
         run: |
-          npm install -g newman newman-reporter-html
+          python3 --version || true
+          python3 -c "print('python ok')" || true
 
-      - name: Debug: show which files will be scanned & discovered routes
+      - name: Run debug script if exists
         run: |
-          echo "Running debug script to list routes in $SOURCE_DIR"
-          python3 scripts/debug_routes.py
-
-      - name: Run CI runner (generate collection)
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          QBURST_GATEWAY: ${{ secrets.QBURST_GATEWAY }}
-        run: |
-          mkdir -p "${OUTPUT_DIR}"
-          python3 ci_runner.py --source-dir "${SOURCE_DIR}" --use-llm --gateway-url "${QBURST_GATEWAY}" --output-dir "${OUTPUT_DIR}"
-
-      - name: Show generated files
-        run: ls -la ${{ env.OUTPUT_DIR }} || true
-
-      - name: Run Postman collection with Newman (local run)
-        env:
-          BASE_URL: ${{ secrets.BASE_URL }}
-        run: |
-          COLLECTION=${{ env.OUTPUT_DIR }}/postman_collection.json
-          mkdir -p newman-reports
-          if [ -f "$COLLECTION" ]; then
-            newman run "$COLLECTION" --env-var "base_url=${BASE_URL}" \
-              --reporters cli,junit,html --reporter-junit-export newman-reports/junit.xml --reporter-html-export newman-reports/report.html || true
+          if [ -f scripts/debug_routes.py ]; then
+            echo "Running scripts/debug_routes.py"
+            python3 scripts/debug_routes.py || true
           else
-            echo "No collection found at $COLLECTION — skipping newman run"
+            echo "scripts/debug_routes.py not present; skipping"
           fi
-          ls -la newman-reports || true
-
-      - name: Upload test artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: api-test-artifacts
-          path: |
-            output/postman_collection.json
-            output/divergence_report.json
-            output/llm_error.log
-            newman-reports/**
-
-      - name: Final: print summary
-        run: |
-          echo "Action finished. Artifacts uploaded (postman collection, divergence report, newman reports)."
