@@ -1,0 +1,106 @@
+name: CI - API divergence + generated tests
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  generate-and-run:
+    runs-on: ubuntu-latest
+    env:
+      OUTPUT_DIR: output
+      SOURCE_DIR: backend
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Set up Node (for Newman)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Python requirements
+        run: |
+          python3 -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then python3 -m pip install -r requirements.txt; fi
+          python3 -m pip install pyyaml openai || true
+
+      - name: Install Newman
+        run: |
+          npm install -g newman newman-reporter-html
+
+      - name: Debug: show which files will be scanned & discovered routes
+        run: |
+          echo "Scanning ${SOURCE_DIR} for routes..."
+          python3 - <<'PY'
+          from src.source_parser import extract_routes_from_project
+          routes = extract_routes_from_project("${{ env.SOURCE_DIR }}")
+          if not routes:
+              print("No routes discovered in folder: ${{ env.SOURCE_DIR }}")
+          else:
+              print("===== ROUTES DISCOVERED =====")
+              for r, info in routes.items():
+                  print(f"{r}  <-- from file: {info.get('source')}")
+          PY
+
+      - name: Run CI runner (generate collection)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          QBURST_GATEWAY: ${{ secrets.QBURST_GATEWAY }}
+        run: |
+          mkdir -p "${OUTPUT_DIR}"
+          python3 ci_runner.py --source-dir "${SOURCE_DIR}" --use-llm --gateway-url "${QBURST_GATEWAY}" --output-dir "${OUTPUT_DIR}"
+
+      - name: Show generated files
+        run: ls -la ${{ env.OUTPUT_DIR }} || true
+
+      - name: Run Postman collection with Newman (local run)
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+        run: |
+          COLLECTION=${{ env.OUTPUT_DIR }}/postman_collection.json
+          mkdir -p newman-reports
+          if [ -f "$COLLECTION" ]; then
+            newman run "$COLLECTION" --env-var "base_url=${BASE_URL}" \
+              --reporters cli,junit,html --reporter-junit-export newman-reports/junit.xml --reporter-html-export newman-reports/report.html || true
+          else
+            echo "No collection found at $COLLECTION — skipping newman run"
+          fi
+          ls -la newman-reports || true
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-artifacts
+          path: |
+            output/postman_collection.json
+            output/divergence_report.json
+            output/llm_error.log
+            newman-reports/**
+
+      - name: Final: print summary
+        run: |
+          echo "Action finished. Artifacts uploaded (postman collection, divergence report, newman reports)."
