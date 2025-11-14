@@ -17,6 +17,10 @@ def create_item():
 @app.route('/items/<int:item_id>', methods=['GET'])
 def get_item(item_id):
     return jsonify({'id': item_id, 'name': 'x'}), 200
+@app.route('/items/<int:item_id>', methods=['GET'])
+def get_item(item_id):
+    return jsonify({'id': item_id, 'name': 'x'}), 200
+
 
 @app.route('/items/<int:item_id>', methods=['GET'])
 def get_item(item_id):
