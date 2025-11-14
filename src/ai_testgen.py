@@ -1,30 +1,31 @@
-"""AI + heuristic Postman collection generator used by app_streamlit.py.
+# src/ai_testgen.py
+"""
+AI + heuristic Postman collection generator used by app_streamlit.py.
 
 Public API:
     generate_postman_collection(swagger: dict, divergences: list, use_llm: bool=False,
                                 model: str="gpt-4o-mini", gateway_url: Optional[str]=None) -> dict
+
 If gateway_url is None and use_llm is True, this module will use the QBURST gateway:
     https://llmgateway.qburst.build/v1
 """
-
+from typing import List, Dict, Any, Optional
 import os
 import json
 import time
-from typing import List, Dict, Any, Optional
 
 # Try to detect OpenAI SDK availability (new and old)
 _HAS_OPENAI = False
 try:
-    from openai import OpenAI  # type: ignore
+    from openai import OpenAI  # new SDK
     _HAS_OPENAI = True
 except Exception:
     try:
-        import openai  # type: ignore
+        import openai  # legacy
         _HAS_OPENAI = True
     except Exception:
         _HAS_OPENAI = False
 
-# Default QBurst gateway (used when use_llm True and no gateway_url provided)
 _QBURST_DEFAULT_GATEWAY = "https://llmgateway.qburst.build/v1"
 
 
@@ -48,7 +49,7 @@ def _heuristic_examples_from_schema(schema: Any):
     edge = {}
     if not isinstance(schema, dict):
         return {"positive": {"sample": "value"}, "negative": {"missing": None}, "edge": {"sample": ""}}
-    props = schema.get("properties", {})
+    props = schema.get("properties", {}) if isinstance(schema.get("properties", {}), dict) else {}
     required = schema.get("required", []) if isinstance(schema.get("required", []), list) else []
     for k, v in props.items():
         t = v.get("type") if isinstance(v, dict) else "string"
@@ -122,22 +123,25 @@ def _heuristic_collection(divergences: List[Dict[str, Any]]):
         neg = examples.get("negative")
         edge = examples.get("edge")
 
-        pos_test = ["pm.test('Status is 2xx', function(){pm.expect(pm.response.code).to.be.within(200,299);});"]
+        pos_test = [
+            "pm.test('Status is 2xx', function(){pm.expect(pm.response.code).to.be.within(200,299);});",
+            "try { pm.test('Response is valid JSON', function(){ JSON.parse(pm.response.text()); }); } catch(e) { pm.test('JSON parse', function(){pm.expect(false).to.be.true;}); }"
+        ]
         neg_test = ["pm.test('Status is 4xx or 5xx for invalid input', function(){pm.expect(pm.response.code).to.be.within(400,599);});"]
         edge_test = ["pm.test('Edge case handled', function(){pm.expect(pm.response.code).to.be.within(200,499);});"]
 
         if pos:
-            coll["item"].append(_build_postman_item(f"{method} {path} - Positive", method, path, body=pos, tests=pos_test))
+            coll["item"].append(_build_postman_item(f"Positive - {method} {path}", method, path, body=pos, tests=pos_test))
         if neg:
-            coll["item"].append(_build_postman_item(f"{method} {path} - Negative", method, path, body=neg, tests=neg_test))
+            coll["item"].append(_build_postman_item(f"Negative - {method} {path}", method, path, body=neg, tests=neg_test))
         if edge:
-            coll["item"].append(_build_postman_item(f"{method} {path} - Divergence", method, path, body=edge, tests=edge_test))
+            coll["item"].append(_build_postman_item(f"Divergence - {method} {path}", method, path, body=edge, tests=edge_test))
     return coll
 
 
 def _call_llm_generate(swagger: Dict[str, Any], divergences: List[Dict[str, Any]],
                        model: str = "gpt-4o-mini", temperature: float = 0.2,
-                       gateway_url: Optional[str] = None):
+                       gateway_url: Optional[str] = None, timeout: int = 60):
     """
     Call the LLM (supports both new OpenAI SDK and legacy openai).
     Returns parsed JSON dict (Postman collection) or raises on failure.
@@ -145,69 +149,80 @@ def _call_llm_generate(swagger: Dict[str, Any], divergences: List[Dict[str, Any]
     if not _HAS_OPENAI:
         raise RuntimeError("OpenAI SDK not installed. Install 'openai' to enable LLM mode.")
 
-    # Enhanced, structured system prompt
+    # Large, explicit system prompt based on user instruction
     system_prompt = (
-        "You are an expert QA automation engineer and API testing specialist."
-        "You are given two inputs:"
-        "1. A Swagger API specification."
-        "2. A divergence report listing mismatches between the Swagger spec and actual code."
-        "Your goal:"
-        "- For EACH issue in the divergence report, create a dedicated **folder** inside the Postman collection."
-        "- Within that folder, generate multiple **test cases (requests)** categorized as:"
-        "  - Positive Tests (expected behavior based on Swagger)"
-        "  - Negative Tests (invalid inputs, missing params, unauthorized access, etc.)"
-        "  - Divergence Tests (tests focused on the issue described in the divergence report)"
-        "Mandatory Rule:"
-        "Every folder in the Postman collection MUST contain at least:"
-        "- One Positive test case"
-        "- One Negative test case"
-        "- One Divergence test case"
-        "Even if the divergence report does not explicitly mention testable details, generate representative test scenarios for all three categories."
-        "Output:"
-        "Return ONLY a valid Postman Collection JSON (v2.1 schema). Use {{base_url}} for host. Include basic pm.test() assertions for response status and validation."
+        "You are an expert QA automation engineer and API testing specialist.\n\n"
+        "You are given two inputs:\n"
+        "1. A Swagger / OpenAPI specification (as JSON).\n"
+        "2. A divergence report listing mismatches between the Swagger spec and the implementation source code.\n\n"
+        "Your task: For EACH divergence issue, produce a Postman Collection (v2.1) where each divergence is a dedicated folder.\n"
+        "Within each folder generate at minimum:\n"
+        "- Positive test(s) (expected behavior based on the Swagger)\n"
+        "- Negative test(s) (invalid inputs, missing params, unauthorized, wrong formats)\n"
+        "- Divergence-focused test(s) that directly test the described mismatch\n\n"
+        "MANDATORY:\n"
+        "- Use {{base_url}} for the host in all requests.\n"
+        "- Include request method, URL path, headers, and body when applicable.\n"
+        "- Each test must include Postman 'test' event JS that asserts status codes and relevant response fields.\n"
+        "- If a response provides values used later (token, id), extract them into environment variables using pm.environment.set and use them in dependent requests.\n"
+        "- Output only valid JSON representing a Postman Collection v2.1 (no extra text).\n\n"
+        "Return: a JSON object compliant with Postman Collection v2.1 schema containing one folder per divergence and the required test cases.\n"
     )
 
     payload = {"swagger": swagger, "divergences": divergences}
 
-    # if gateway_url not provided, use QBurst default
     if not gateway_url:
         gateway_url = _QBURST_DEFAULT_GATEWAY
 
+    # sanitize env inputs and secrets
+    api_key = (os.environ.get("OPENAI_API_KEY") or os.environ.get("API_KEY") or "").strip()
+    gateway_url = (gateway_url or "").strip()
+
+    # safe masked debug (prints to runner logs; not the full key)
+    try:
+        masked = (api_key[:6] + "...") if api_key else "<missing>"
+        print(f"[ai_testgen] Using gateway: {gateway_url!r}, OPENAI_API_KEY present: {bool(api_key)}, masked prefix: {masked}")
+    except Exception:
+        pass
+
     messages_payload = json.dumps(payload)
 
-    # Try new OpenAI client first
+    # Try new OpenAI client first (OpenAI class)
+    # NOTE: different SDKs have different usage. Handle both.
+    last_err = None
     try:
-        from openai import OpenAI as OpenAIClient  # type: ignore
-        api_key = os.environ.get("OPENAI_API_KEY") or os.environ.get("API_KEY")
-        if not api_key:
-            raise RuntimeError("OPENAI_API_KEY or API_KEY not set in environment for LLM gateway.")
-        client = OpenAIClient(api_key=api_key, base_url=gateway_url)
-        resp = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": messages_payload}
-            ],
-            temperature=temperature
-        )
-        text = ""
+        # New SDK path: OpenAI()
         try:
-            text = resp.choices[0].message.content
-        except Exception:
-            text = getattr(resp.choices[0], "text", "")
-        return _safe_json_load(text)
-    except Exception:
-        # fallback legacy
-        try:
-            import openai  # type: ignore
-            api_key = os.environ.get("OPENAI_API_KEY") or os.environ.get("API_KEY")
-            if not api_key:
-                raise RuntimeError("OPENAI_API_KEY or API_KEY not set in environment for LLM gateway.")
-            if gateway_url:
-                openai.api_base = gateway_url
-            openai.api_key = api_key
-            client = OpenAIClient(api_key=api_key, base_url=gateway_url)
+            from openai import OpenAI as OpenAIClient  # type: ignore
+            client = OpenAIClient(api_key=api_key, base_url=gateway_url) if api_key else OpenAIClient(base_url=gateway_url)
             resp = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": messages_payload}
+                ],
+                temperature=temperature,
+                timeout=timeout
+            )
+            # extract text content
+            text = ""
+            try:
+                text = resp.choices[0].message.content
+            except Exception:
+                text = getattr(resp.choices[0], "text", "")
+            return _safe_json_load(text)
+        except Exception as e_new:
+            last_err = e_new
+            # Fall through to legacy openai path
+            pass
+
+        # Legacy openai library path
+        try:
+            import openai as _openai_legacy  # type: ignore
+            if gateway_url:
+                _openai_legacy.api_base = gateway_url
+            _openai_legacy.api_key = api_key
+            resp = _openai_legacy.ChatCompletion.create(
                 model=model,
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -217,12 +232,17 @@ def _call_llm_generate(swagger: Dict[str, Any], divergences: List[Dict[str, Any]
             )
             text = ""
             try:
+                # new style
                 text = resp.choices[0].message['content']
             except Exception:
+                # fallback older format
                 text = getattr(resp.choices[0], "text", "")
             return _safe_json_load(text)
-        except Exception as e:
-            raise RuntimeError(f"LLM generation failed: {e}")
+        except Exception as e_legacy:
+            last_err = e_legacy
+            raise RuntimeError(f"LLM generation failed (both SDK attempts). new_err={last_err} legacy_err={e_legacy}")
+    except Exception as final_e:
+        raise RuntimeError(f"LLM generation failed: {final_e}")
 
 
 def generate_postman_collection(swagger: Dict[str, Any], divergences: List[Dict[str, Any]],

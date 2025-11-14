@@ -6,8 +6,8 @@
       "summary": "Get item",
       "issue": "Endpoint missing in source code",
       "expected": [
-        "200",
-        "404"
+        "404",
+        "200"
       ],
       "found": [],
       "risk_score": 0.9
@@ -39,8 +39,8 @@
         "200"
       ],
       "found": [
-        "200",
-        "201"
+        "201",
+        "200"
       ],
       "risk_score": 0.5
     },
@@ -53,8 +53,8 @@
         "201"
       ],
       "found": [
-        "200",
-        "201"
+        "201",
+        "200"
       ],
       "risk_score": 0.5
     }
