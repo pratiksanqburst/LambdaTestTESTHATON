@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="Sample API Tests" tests="9" time="0.000">
-  <testsuite name="GET /items/{item_id} - Divergence: Endpoint missing in source code / Positive Test - Get Item" id="d159a77f-c0dd-4bbf-80aa-fd9770eb6a71" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+<testsuites name="Sample API Test Collection" tests="12" time="0.000">
+  <testsuite name="GET /items/{item_id} - Endpoint missing in source code / Positive Test - Get Item" id="88452ffc-225b-43e8-8e1e-658b86a9f081" timestamp="2025-11-14T07:25:18.155Z" tests="0" failures="0" errors="1" time="0.000">
     <system-err>
       <![CDATA[Iteration: 0
 RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
     at emitLookup (node:net:1469:17)
-    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
-    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at /home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:236:21)
     at Object.onceWrapper (node:events:639:26)
     at Socket.emit (node:events:524:28)
     at emitErrorNT (node:internal/streams/destroy:169:8)
@@ -16,26 +16,14 @@ RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
 ---
 ]]>
     </system-err>
-    <testcase name="Status code is 200" time="0.000" classname="SampleApiTests">
-      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
-        <![CDATA[Failed 1 times.]]>
-        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
-        <![CDATA[Collection name: Sample API Tests.]]>
-        <![CDATA[Request name: GET /items/{item_id} - Divergence: Endpoint missing in source code / Positive Test - Get Item.]]>
-        <![CDATA[Test description: Status code is 200.]]>
-        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
-        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
-   at Object.eval sandbox-script.js:1:1).]]>
-      </failure>
-    </testcase>
   </testsuite>
-  <testsuite name="GET /items/{item_id} - Divergence: Endpoint missing in source code / Negative Test - Get Non-existent Item" id="3fc6ed55-f206-40d7-b2bf-24431bdd48c5" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+  <testsuite name="GET /items/{item_id} - Endpoint missing in source code / Negative Test - Get Item Not Found" id="6c907d24-09c8-4117-aad8-06ba31cfb81e" timestamp="2025-11-14T07:25:18.155Z" tests="0" failures="0" errors="1" time="0.000">
     <system-err>
       <![CDATA[Iteration: 0
 RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
     at emitLookup (node:net:1469:17)
-    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
-    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at /home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:236:21)
     at Object.onceWrapper (node:events:639:26)
     at Socket.emit (node:events:524:28)
     at emitErrorNT (node:internal/streams/destroy:169:8)
@@ -45,26 +33,14 @@ RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
 ---
 ]]>
     </system-err>
-    <testcase name="Status code is 404" time="0.000" classname="SampleApiTests">
-      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
-        <![CDATA[Failed 1 times.]]>
-        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
-        <![CDATA[Collection name: Sample API Tests.]]>
-        <![CDATA[Request name: GET /items/{item_id} - Divergence: Endpoint missing in source code / Negative Test - Get Non-existent Item.]]>
-        <![CDATA[Test description: Status code is 404.]]>
-        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
-        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
-   at Object.eval sandbox-script.js:1:2).]]>
-      </failure>
-    </testcase>
   </testsuite>
-  <testsuite name="GET /items/{item_id} - Divergence: Endpoint missing in source code / Divergence Test - Missing Endpoint" id="b01cacdd-dc66-4dfe-8340-9af2fff19519" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+  <testsuite name="GET /items/{item_id} - Endpoint missing in source code / Divergence Test - Missing Endpoint" id="36b79d04-dd05-43dd-839b-4d7e449695d4" timestamp="2025-11-14T07:25:18.155Z" tests="0" failures="0" errors="1" time="0.000">
     <system-err>
       <![CDATA[Iteration: 0
 RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
     at emitLookup (node:net:1469:17)
-    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
-    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at /home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:236:21)
     at Object.onceWrapper (node:events:639:26)
     at Socket.emit (node:events:524:28)
     at emitErrorNT (node:internal/streams/destroy:169:8)
@@ -74,26 +50,14 @@ RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
 ---
 ]]>
     </system-err>
-    <testcase name="Endpoint should not exist" time="0.000" classname="SampleApiTests">
-      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
-        <![CDATA[Failed 1 times.]]>
-        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
-        <![CDATA[Collection name: Sample API Tests.]]>
-        <![CDATA[Request name: GET /items/{item_id} - Divergence: Endpoint missing in source code / Divergence Test - Missing Endpoint.]]>
-        <![CDATA[Test description: Endpoint should not exist.]]>
-        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
-        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
-   at Object.eval sandbox-script.js:1:3).]]>
-      </failure>
-    </testcase>
   </testsuite>
-  <testsuite name="POST /items - Divergence: Schema validation needed / Positive Test - Create Item" id="0cb57221-5785-4e16-a24a-47a63e8625e1" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+  <testsuite name="POST /items - Schema validation needed / Positive Test - Create Item" id="32ed6b2d-cc96-4072-b922-f7b855fa00e0" timestamp="2025-11-14T07:25:18.155Z" tests="0" failures="0" errors="1" time="0.000">
     <system-err>
       <![CDATA[Iteration: 0
 RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
     at emitLookup (node:net:1469:17)
-    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
-    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at /home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:236:21)
     at Object.onceWrapper (node:events:639:26)
     at Socket.emit (node:events:524:28)
     at emitErrorNT (node:internal/streams/destroy:169:8)
@@ -103,26 +67,14 @@ RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
 ---
 ]]>
     </system-err>
-    <testcase name="Status code is 201" time="0.000" classname="SampleApiTests">
-      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
-        <![CDATA[Failed 1 times.]]>
-        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
-        <![CDATA[Collection name: Sample API Tests.]]>
-        <![CDATA[Request name: POST /items - Divergence: Schema validation needed / Positive Test - Create Item.]]>
-        <![CDATA[Test description: Status code is 201.]]>
-        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
-        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
-   at Object.eval sandbox-script.js:1:4).]]>
-      </failure>
-    </testcase>
   </testsuite>
-  <testsuite name="POST /items - Divergence: Schema validation needed / Negative Test - Create Item Without Name" id="9567b3b8-8fd1-458e-a872-49fe3a499dd5" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+  <testsuite name="POST /items - Schema validation needed / Negative Test - Create Item Missing Name" id="2fab4d89-a9e2-451b-b52a-79503d128237" timestamp="2025-11-14T07:25:18.155Z" tests="0" failures="0" errors="1" time="0.000">
     <system-err>
       <![CDATA[Iteration: 0
 RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
     at emitLookup (node:net:1469:17)
-    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
-    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at /home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:236:21)
     at Object.onceWrapper (node:events:639:26)
     at Socket.emit (node:events:524:28)
     at emitErrorNT (node:internal/streams/destroy:169:8)
@@ -132,26 +84,14 @@ RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
 ---
 ]]>
     </system-err>
-    <testcase name="Status code is 400" time="0.000" classname="SampleApiTests">
-      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
-        <![CDATA[Failed 1 times.]]>
-        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
-        <![CDATA[Collection name: Sample API Tests.]]>
-        <![CDATA[Request name: POST /items - Divergence: Schema validation needed / Negative Test - Create Item Without Name.]]>
-        <![CDATA[Test description: Status code is 400.]]>
-        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
-        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
-   at Object.eval sandbox-script.js:1:5).]]>
-      </failure>
-    </testcase>
   </testsuite>
-  <testsuite name="POST /items - Divergence: Schema validation needed / Divergence Test - Validate Schema" id="29403084-5214-4cf8-b6d6-5b9bda5a72d8" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+  <testsuite name="POST /items - Schema validation needed / Divergence Test - Schema Validation Issue" id="50441f30-06bb-4bac-88a5-949c85083046" timestamp="2025-11-14T07:25:18.155Z" tests="0" failures="0" errors="1" time="0.000">
     <system-err>
       <![CDATA[Iteration: 0
 RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
     at emitLookup (node:net:1469:17)
-    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
-    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at /home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:236:21)
     at Object.onceWrapper (node:events:639:26)
     at Socket.emit (node:events:524:28)
     at emitErrorNT (node:internal/streams/destroy:169:8)
@@ -161,26 +101,14 @@ RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
 ---
 ]]>
     </system-err>
-    <testcase name="Status code is 400" time="0.000" classname="SampleApiTests">
-      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
-        <![CDATA[Failed 1 times.]]>
-        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
-        <![CDATA[Collection name: Sample API Tests.]]>
-        <![CDATA[Request name: POST /items - Divergence: Schema validation needed / Divergence Test - Validate Schema.]]>
-        <![CDATA[Test description: Status code is 400.]]>
-        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
-        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
-   at Object.eval sandbox-script.js:1:6).]]>
-      </failure>
-    </testcase>
   </testsuite>
-  <testsuite name="GET /items - Divergence: Extra responses / Positive Test - List Items" id="dda5a1fa-52cd-4f2c-b559-38f1b2cd34aa" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+  <testsuite name="GET /items - Extra responses: ['201'] / Positive Test - List Items" id="29b5e7c2-38f8-4e95-9b01-abbe4a7e220f" timestamp="2025-11-14T07:25:18.155Z" tests="0" failures="0" errors="1" time="0.000">
     <system-err>
       <![CDATA[Iteration: 0
 RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
     at emitLookup (node:net:1469:17)
-    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
-    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at /home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:236:21)
     at Object.onceWrapper (node:events:639:26)
     at Socket.emit (node:events:524:28)
     at emitErrorNT (node:internal/streams/destroy:169:8)
@@ -190,26 +118,14 @@ RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
 ---
 ]]>
     </system-err>
-    <testcase name="Status code is 200" time="0.000" classname="SampleApiTests">
-      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
-        <![CDATA[Failed 1 times.]]>
-        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
-        <![CDATA[Collection name: Sample API Tests.]]>
-        <![CDATA[Request name: GET /items - Divergence: Extra responses / Positive Test - List Items.]]>
-        <![CDATA[Test description: Status code is 200.]]>
-        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
-        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
-   at Object.eval sandbox-script.js:1:7).]]>
-      </failure>
-    </testcase>
   </testsuite>
-  <testsuite name="GET /items - Divergence: Extra responses / Negative Test - Unauthorized Access" id="f4047dac-a9f7-4823-a341-23c370b179e6" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+  <testsuite name="GET /items - Extra responses: ['201'] / Negative Test - List Items Unauthorized" id="4f609c57-2037-4319-b87e-878a369a6412" timestamp="2025-11-14T07:25:18.155Z" tests="0" failures="0" errors="1" time="0.000">
     <system-err>
       <![CDATA[Iteration: 0
 RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
     at emitLookup (node:net:1469:17)
-    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
-    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at /home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:236:21)
     at Object.onceWrapper (node:events:639:26)
     at Socket.emit (node:events:524:28)
     at emitErrorNT (node:internal/streams/destroy:169:8)
@@ -219,26 +135,14 @@ RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
 ---
 ]]>
     </system-err>
-    <testcase name="Status code is 401" time="0.000" classname="SampleApiTests">
-      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
-        <![CDATA[Failed 1 times.]]>
-        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
-        <![CDATA[Collection name: Sample API Tests.]]>
-        <![CDATA[Request name: GET /items - Divergence: Extra responses / Negative Test - Unauthorized Access.]]>
-        <![CDATA[Test description: Status code is 401.]]>
-        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
-        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
-   at Object.eval sandbox-script.js:1:8).]]>
-      </failure>
-    </testcase>
   </testsuite>
-  <testsuite name="GET /items - Divergence: Extra responses / Divergence Test - Check Extra Response" id="82d0f03d-a633-45ca-8045-01159604855f" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+  <testsuite name="GET /items - Extra responses: ['201'] / Divergence Test - Extra Response 201" id="8208ab8e-96da-4e65-8376-62b714ef3216" timestamp="2025-11-14T07:25:18.155Z" tests="0" failures="0" errors="1" time="0.000">
     <system-err>
       <![CDATA[Iteration: 0
 RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
     at emitLookup (node:net:1469:17)
-    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
-    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at /home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:236:21)
     at Object.onceWrapper (node:events:639:26)
     at Socket.emit (node:events:524:28)
     at emitErrorNT (node:internal/streams/destroy:169:8)
@@ -248,17 +152,56 @@ RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
 ---
 ]]>
     </system-err>
-    <testcase name="Status code should not be 201" time="0.000" classname="SampleApiTests">
-      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
-        <![CDATA[Failed 1 times.]]>
-        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
-        <![CDATA[Collection name: Sample API Tests.]]>
-        <![CDATA[Request name: GET /items - Divergence: Extra responses / Divergence Test - Check Extra Response.]]>
-        <![CDATA[Test description: Status code should not be 201.]]>
-        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
-        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
-   at Object.eval sandbox-script.js:1:9).]]>
-      </failure>
-    </testcase>
+  </testsuite>
+  <testsuite name="GET /items/&lt;int:item_id> - Extra route not in Swagger / Positive Test - Get Item by ID" id="ecdd8f1a-4f49-4155-860c-491f06dc518f" timestamp="2025-11-14T07:25:18.155Z" tests="0" failures="0" errors="1" time="0.000">
+    <system-err>
+      <![CDATA[Iteration: 0
+RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
+    at emitLookup (node:net:1469:17)
+    at /home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at Object.onceWrapper (node:events:639:26)
+    at Socket.emit (node:events:524:28)
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+---
+]]>
+    </system-err>
+  </testsuite>
+  <testsuite name="GET /items/&lt;int:item_id> - Extra route not in Swagger / Negative Test - Get Item Invalid ID" id="4720bb1c-f496-4d6e-a07d-a69b2aeaf905" timestamp="2025-11-14T07:25:18.155Z" tests="0" failures="0" errors="1" time="0.000">
+    <system-err>
+      <![CDATA[Iteration: 0
+RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
+    at emitLookup (node:net:1469:17)
+    at /home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at Object.onceWrapper (node:events:639:26)
+    at Socket.emit (node:events:524:28)
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+---
+]]>
+    </system-err>
+  </testsuite>
+  <testsuite name="GET /items/&lt;int:item_id> - Extra route not in Swagger / Divergence Test - Extra Route Verification" id="ba360269-fd13-4b09-99bc-5cc921337ad7" timestamp="2025-11-14T07:25:18.155Z" tests="0" failures="0" errors="1" time="0.000">
+    <system-err>
+      <![CDATA[Iteration: 0
+RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
+    at emitLookup (node:net:1469:17)
+    at /home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Documents/LambdaTestTESTHATON/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at Object.onceWrapper (node:events:639:26)
+    at Socket.emit (node:events:524:28)
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+---
+]]>
+    </system-err>
   </testsuite>
 </testsuites>

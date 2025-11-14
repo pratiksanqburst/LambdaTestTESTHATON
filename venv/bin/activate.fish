@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/venv
+set -gx VIRTUAL_ENV /home/pratik/Documents/LambdaTestTESTHATON/venv
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"bin $PATH
