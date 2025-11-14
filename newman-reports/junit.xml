@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Sample API Tests" tests="9" time="0.000">
+  <testsuite name="GET /items/{item_id} - Divergence: Endpoint missing in source code / Positive Test - Get Item" id="d159a77f-c0dd-4bbf-80aa-fd9770eb6a71" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+    <system-err>
+      <![CDATA[Iteration: 0
+RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
+    at emitLookup (node:net:1469:17)
+    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at Object.onceWrapper (node:events:639:26)
+    at Socket.emit (node:events:524:28)
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+---
+]]>
+    </system-err>
+    <testcase name="Status code is 200" time="0.000" classname="SampleApiTests">
+      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
+        <![CDATA[Failed 1 times.]]>
+        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
+        <![CDATA[Collection name: Sample API Tests.]]>
+        <![CDATA[Request name: GET /items/{item_id} - Divergence: Endpoint missing in source code / Positive Test - Get Item.]]>
+        <![CDATA[Test description: Status code is 200.]]>
+        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
+        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
+   at Object.eval sandbox-script.js:1:1).]]>
+      </failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="GET /items/{item_id} - Divergence: Endpoint missing in source code / Negative Test - Get Non-existent Item" id="3fc6ed55-f206-40d7-b2bf-24431bdd48c5" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+    <system-err>
+      <![CDATA[Iteration: 0
+RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
+    at emitLookup (node:net:1469:17)
+    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at Object.onceWrapper (node:events:639:26)
+    at Socket.emit (node:events:524:28)
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+---
+]]>
+    </system-err>
+    <testcase name="Status code is 404" time="0.000" classname="SampleApiTests">
+      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
+        <![CDATA[Failed 1 times.]]>
+        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
+        <![CDATA[Collection name: Sample API Tests.]]>
+        <![CDATA[Request name: GET /items/{item_id} - Divergence: Endpoint missing in source code / Negative Test - Get Non-existent Item.]]>
+        <![CDATA[Test description: Status code is 404.]]>
+        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
+        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
+   at Object.eval sandbox-script.js:1:2).]]>
+      </failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="GET /items/{item_id} - Divergence: Endpoint missing in source code / Divergence Test - Missing Endpoint" id="b01cacdd-dc66-4dfe-8340-9af2fff19519" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+    <system-err>
+      <![CDATA[Iteration: 0
+RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
+    at emitLookup (node:net:1469:17)
+    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at Object.onceWrapper (node:events:639:26)
+    at Socket.emit (node:events:524:28)
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+---
+]]>
+    </system-err>
+    <testcase name="Endpoint should not exist" time="0.000" classname="SampleApiTests">
+      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
+        <![CDATA[Failed 1 times.]]>
+        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
+        <![CDATA[Collection name: Sample API Tests.]]>
+        <![CDATA[Request name: GET /items/{item_id} - Divergence: Endpoint missing in source code / Divergence Test - Missing Endpoint.]]>
+        <![CDATA[Test description: Endpoint should not exist.]]>
+        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
+        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
+   at Object.eval sandbox-script.js:1:3).]]>
+      </failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="POST /items - Divergence: Schema validation needed / Positive Test - Create Item" id="0cb57221-5785-4e16-a24a-47a63e8625e1" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+    <system-err>
+      <![CDATA[Iteration: 0
+RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
+    at emitLookup (node:net:1469:17)
+    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at Object.onceWrapper (node:events:639:26)
+    at Socket.emit (node:events:524:28)
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+---
+]]>
+    </system-err>
+    <testcase name="Status code is 201" time="0.000" classname="SampleApiTests">
+      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
+        <![CDATA[Failed 1 times.]]>
+        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
+        <![CDATA[Collection name: Sample API Tests.]]>
+        <![CDATA[Request name: POST /items - Divergence: Schema validation needed / Positive Test - Create Item.]]>
+        <![CDATA[Test description: Status code is 201.]]>
+        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
+        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
+   at Object.eval sandbox-script.js:1:4).]]>
+      </failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="POST /items - Divergence: Schema validation needed / Negative Test - Create Item Without Name" id="9567b3b8-8fd1-458e-a872-49fe3a499dd5" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+    <system-err>
+      <![CDATA[Iteration: 0
+RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
+    at emitLookup (node:net:1469:17)
+    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at Object.onceWrapper (node:events:639:26)
+    at Socket.emit (node:events:524:28)
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+---
+]]>
+    </system-err>
+    <testcase name="Status code is 400" time="0.000" classname="SampleApiTests">
+      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
+        <![CDATA[Failed 1 times.]]>
+        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
+        <![CDATA[Collection name: Sample API Tests.]]>
+        <![CDATA[Request name: POST /items - Divergence: Schema validation needed / Negative Test - Create Item Without Name.]]>
+        <![CDATA[Test description: Status code is 400.]]>
+        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
+        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
+   at Object.eval sandbox-script.js:1:5).]]>
+      </failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="POST /items - Divergence: Schema validation needed / Divergence Test - Validate Schema" id="29403084-5214-4cf8-b6d6-5b9bda5a72d8" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+    <system-err>
+      <![CDATA[Iteration: 0
+RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
+    at emitLookup (node:net:1469:17)
+    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at Object.onceWrapper (node:events:639:26)
+    at Socket.emit (node:events:524:28)
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+---
+]]>
+    </system-err>
+    <testcase name="Status code is 400" time="0.000" classname="SampleApiTests">
+      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
+        <![CDATA[Failed 1 times.]]>
+        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
+        <![CDATA[Collection name: Sample API Tests.]]>
+        <![CDATA[Request name: POST /items - Divergence: Schema validation needed / Divergence Test - Validate Schema.]]>
+        <![CDATA[Test description: Status code is 400.]]>
+        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
+        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
+   at Object.eval sandbox-script.js:1:6).]]>
+      </failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="GET /items - Divergence: Extra responses / Positive Test - List Items" id="dda5a1fa-52cd-4f2c-b559-38f1b2cd34aa" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+    <system-err>
+      <![CDATA[Iteration: 0
+RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
+    at emitLookup (node:net:1469:17)
+    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at Object.onceWrapper (node:events:639:26)
+    at Socket.emit (node:events:524:28)
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+---
+]]>
+    </system-err>
+    <testcase name="Status code is 200" time="0.000" classname="SampleApiTests">
+      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
+        <![CDATA[Failed 1 times.]]>
+        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
+        <![CDATA[Collection name: Sample API Tests.]]>
+        <![CDATA[Request name: GET /items - Divergence: Extra responses / Positive Test - List Items.]]>
+        <![CDATA[Test description: Status code is 200.]]>
+        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
+        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
+   at Object.eval sandbox-script.js:1:7).]]>
+      </failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="GET /items - Divergence: Extra responses / Negative Test - Unauthorized Access" id="f4047dac-a9f7-4823-a341-23c370b179e6" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+    <system-err>
+      <![CDATA[Iteration: 0
+RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
+    at emitLookup (node:net:1469:17)
+    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at Object.onceWrapper (node:events:639:26)
+    at Socket.emit (node:events:524:28)
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+---
+]]>
+    </system-err>
+    <testcase name="Status code is 401" time="0.000" classname="SampleApiTests">
+      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
+        <![CDATA[Failed 1 times.]]>
+        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
+        <![CDATA[Collection name: Sample API Tests.]]>
+        <![CDATA[Request name: GET /items - Divergence: Extra responses / Negative Test - Unauthorized Access.]]>
+        <![CDATA[Test description: Status code is 401.]]>
+        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
+        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
+   at Object.eval sandbox-script.js:1:8).]]>
+      </failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="GET /items - Divergence: Extra responses / Divergence Test - Check Extra Response" id="82d0f03d-a633-45ca-8045-01159604855f" timestamp="2025-11-14T06:49:41.079Z" tests="1" failures="1" errors="1" time="0.000">
+    <system-err>
+      <![CDATA[Iteration: 0
+RequestError: TypeError [ERR_INVALID_IP_ADDRESS]: Invalid IP address: undefined
+    at emitLookup (node:net:1469:17)
+    at /home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:285:31
+    at Socket.done (/home/pratik/Downloads/CLI_API_DIVERGNECE_PREDICTOR/node_modules/postman-runtime/lib/requester/core.js:236:21)
+    at Object.onceWrapper (node:events:639:26)
+    at Socket.emit (node:events:524:28)
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+---
+]]>
+    </system-err>
+    <testcase name="Status code should not be 201" time="0.000" classname="SampleApiTests">
+      <failure type="AssertionFailure" message="expected { Object (id, _details, ...) } to have property 'code'">
+        <![CDATA[Failed 1 times.]]>
+        <![CDATA[Collection JSON ID: 12345-67890-abcdef.]]>
+        <![CDATA[Collection name: Sample API Tests.]]>
+        <![CDATA[Request name: GET /items - Divergence: Extra responses / Divergence Test - Check Extra Response.]]>
+        <![CDATA[Test description: Status code should not be 201.]]>
+        <![CDATA[Error message: expected { Object (id, _details, ...) } to have property 'code'.]]>
+        <![CDATA[Stacktrace: AssertionError: expected { Object (id, _details, ...) } to have property 'code'
+   at Object.eval sandbox-script.js:1:9).]]>
+      </failure>
+    </testcase>
+  </testsuite>
+</testsuites>

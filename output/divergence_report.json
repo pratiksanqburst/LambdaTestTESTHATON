@@ -1,0 +1,62 @@
+{
+  "divergences": [
+    {
+      "endpoint": "GET /items/{item_id}",
+      "method": "GET",
+      "summary": "Get item",
+      "issue": "Endpoint missing in source code",
+      "expected": [
+        "200",
+        "404"
+      ],
+      "found": [],
+      "risk_score": 0.9
+    },
+    {
+      "endpoint": "POST /items",
+      "method": "POST",
+      "summary": "Create item",
+      "issue": "Schema validation needed",
+      "expected": "Valid schema",
+      "found": "Approx size 84",
+      "risk_score": 0.7
+    },
+    {
+      "endpoint": "GET /items/<int:item_id>",
+      "method": "GET",
+      "summary": "",
+      "issue": "Extra route not in Swagger",
+      "expected": [],
+      "found": [],
+      "risk_score": 0.6
+    },
+    {
+      "endpoint": "GET /items",
+      "method": "GET",
+      "summary": "List items",
+      "issue": "Extra responses: ['201']",
+      "expected": [
+        "200"
+      ],
+      "found": [
+        "200",
+        "201"
+      ],
+      "risk_score": 0.5
+    },
+    {
+      "endpoint": "POST /items",
+      "method": "POST",
+      "summary": "Create item",
+      "issue": "Extra responses: ['200']",
+      "expected": [
+        "201"
+      ],
+      "found": [
+        "200",
+        "201"
+      ],
+      "risk_score": 0.5
+    }
+  ]
+}

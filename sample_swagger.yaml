@@ -1,0 +1,33 @@
+openapi: 3.0.0
+info:
+  title: Sample API
+  version: 1.0.0
+paths:
+  /items:
+    get:
+      summary: List items
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Create item
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required: [name]
+      responses:
+        '201':
+          description: Created
+  /items/{item_id}:
+    get:
+      summary: Get item
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not found
