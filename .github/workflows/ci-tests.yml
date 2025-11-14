@@ -1,4 +1,6 @@
-name: CI - API divergence + generated tests
+mkdir -p .github/workflows
+cat > .github/workflows/ci-tests.yml <<'YAML'
+name: CI - API divergence + generated tests (no heredoc)
 
 on:
   workflow_dispatch: {}
@@ -20,18 +22,16 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: '3.10'
 
       - name: Set up Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
 
       - name: Cache pip
         uses: actions/cache@v4
@@ -46,27 +46,24 @@ jobs:
           python3 -m pip install --upgrade pip
           if [ -f requirements.txt ]; then python3 -m pip install -r requirements.txt; fi
           python3 -m pip install pyyaml openai || true
+        shell: bash
 
-      - name: Install Newman locally
+      - name: Install Newman (local)
         run: |
           npm install newman newman-reporter-html
+        shell: bash
 
-      - name: Debug: list discovered routes (optional)
+      - name: Debug: run script listing routes (no inline code)
         run: |
-          echo "Scanning ${SOURCE_DIR} for routes"
+          echo "Running scripts/debug_routes.py (SOURCE_DIR=${SOURCE_DIR})"
           if [ -f scripts/debug_routes.py ]; then
             python3 scripts/debug_routes.py || true
           else
-            echo "No scripts/debug_routes.py found, running inline scanner"
-            python3 - <<'PY'
-from src.source_parser import extract_routes_from_project
-import json, os
-routes = extract_routes_from_project(os.environ.get("SOURCE_DIR","backend"))
-print(json.dumps(routes, indent=2))
-PY
+            echo "scripts/debug_routes.py missing; skipping debug."
+          fi
         shell: bash
 
-      - name: Run CI runner (generate collection and divergence)
+      - name: Run CI runner (generate collection)
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -78,38 +75,36 @@ PY
 
       - name: Show generated output files
         run: |
-          echo "Output folder contents:"
+          echo "Contents of ${OUTPUT_DIR}:"
           ls -la "${OUTPUT_DIR}" || true
-          echo "Show small preview of postman collection (if exists):"
           if [ -f "${OUTPUT_DIR}/postman_collection.json" ]; then
-            head -n 60 "${OUTPUT_DIR}/postman_collection.json"
-          else
-            echo "postman_collection.json not found"
+            echo "postman_collection.json present"
+            head -n 60 "${OUTPUT_DIR}/postman_collection.json" || true
           fi
         shell: bash
 
-      - name: Run newman on generated collection
+      - name: Run newman on generated collection (uses local npx)
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
         run: |
           COLLECTION="${OUTPUT_DIR}/postman_collection.json"
           mkdir -p newman-reports
           if [ -f "$COLLECTION" ]; then
-            # use npx to run the locally installed newman
             npx newman run "$COLLECTION" --env-var "base_url=${BASE_URL}" \
               --reporters cli,html,junit --reporter-junit-export newman-reports/junit.xml --reporter-html-export newman-reports/report.html || true
           else
-            echo "No collection found at $COLLECTION — skipping newman"
+            echo "No collection at $COLLECTION; skipping newman."
           fi
           ls -la newman-reports || true
         shell: bash
 
-      - name: Upload artifacts (postman collection, divergence, newman reports)
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: api-test-artifacts
           path: |
             output/postman_collection.json
             output/divergence_report.json
-            newman-reports/**
             output/llm_error.log
+            newman-reports/**
+YAML
