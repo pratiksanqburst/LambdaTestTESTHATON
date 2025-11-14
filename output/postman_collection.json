@@ -1,7 +1,6 @@
 {
   "info": {
-    "_postman_id": "12345-67890-abcdef",
-    "name": "Divergence Tests for Sample API",
+    "name": "Divergence Test Collection",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -62,7 +61,7 @@
       "name": "POST /items - Schema validation needed",
       "item": [
         {
-          "name": "Positive Test - Create Item",
+          "name": "Positive Test - Valid Schema",
           "request": {
             "method": "POST",
             "header": [
@@ -93,15 +92,14 @@
                 "exec": [
                   "pm.test('Status code is 201', function () {",
                   "    pm.response.to.have.status(201);",
-                  "});",
-                  "pm.environment.set('item_id', pm.response.json().id);"
+                  "});"
                 ]
               }
             }
           ]
         },
         {
-          "name": "Negative Test - Missing Name",
+          "name": "Negative Test - Invalid Schema",
           "request": {
             "method": "POST",
             "header": [
@@ -137,29 +135,26 @@
               }
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "name": "GET /items/<int:item_id> - Extra route not in Swagger",
+      "item": [
         {
-          "name": "Divergence Test - Invalid Schema",
+          "name": "Negative Test - Invalid Route",
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{base_url}}/items",
+              "raw": "{{base_url}}/items/1",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "items"
+                "items",
+                "1"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\"name\": 12345}"
             }
           },
           "event": [
@@ -168,8 +163,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status code is 400', function () {",
-                  "    pm.response.to.have.status(400);",
+                  "pm.test('Status code is 404', function () {",
+                  "    pm.response.to.have.status(404);",
                   "});"
                 ]
               }
