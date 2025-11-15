@@ -1,33 +1,141 @@
 openapi: 3.0.0
 info:
-  title: Sample API
+  title: ReqRes Demo API
   version: 1.0.0
+servers:
+  - url: https://reqres.in/api
 paths:
-  /items:
+  /users:
     get:
-      summary: List items
+      summary: List users
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
       responses:
-        '200':
-          description: OK
+        "200":
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                  per_page:
+                    type: integer
+                  total:
+                    type: integer
+                  total_pages:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        email:
+                          type: string
+                        first_name:
+                          type: string
+                        last_name:
+                          type: string
+                        avatar:
+                          type: string
     post:
-      summary: Create item
+      summary: Create user
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - name
+                - job
               properties:
                 name:
                   type: string
-              required: [name]
+                job:
+                  type: string
       responses:
-        '201':
-          description: Created
-  /items/{item_id}:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  job:
+                    type: string
+                  id:
+                    type: string
+                  createdAt:
+                    type: string
+  /users/{id}:
     get:
-      summary: Get item
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
-        '200':
-          description: OK
-        '404':
-          description: Not found
+        "200":
+          description: User found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      email:
+                        type: string
+                      first_name:
+                        type: string
+                      last_name:
+                        type: string
+                      avatar:
+                        type: string
+        "404":
+          description: User not found
+  /login:
+    post:
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        "400":
+          description: Missing email or password
+components: {}

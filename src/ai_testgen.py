@@ -151,7 +151,7 @@ def _call_llm_generate(swagger: Dict[str, Any], divergences: List[Dict[str, Any]
 
     # Large, explicit system prompt based on user instruction
     system_prompt = (
-        "You are an expert QA automation engineer and API testing specialist.\n\n"
+        "You are an expert QA automation engineer and API testing specialist\n\n"
         "You are given two inputs:\n"
         "1. A Swagger / OpenAPI specification (as JSON).\n"
         "2. A divergence report listing mismatches between the Swagger spec and the implementation source code.\n\n"
