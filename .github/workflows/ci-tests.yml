@@ -3,9 +3,9 @@ name: CI - API divergence + generated tests (no inline Python)
 on:
   workflow_dispatch: {}
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   contents: read
@@ -23,6 +23,7 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Ensure Python can import local src package
       - name: Add workspace to PYTHONPATH
         run: echo "PYTHONPATH=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
 
@@ -51,129 +52,112 @@ jobs:
           python3 -m pip install pyyaml openai || true
         shell: bash
 
-      - name: Install Newman
-        run: npm install newman newman-reporter-html
+      - name: Install Newman (local)
+        run: |
+          npm install newman newman-reporter-html
         shell: bash
 
-      - name: Debug routes
+      - name: Debug list discovered routes (script)
+        # script should exist at scripts/debug_routes.py and import src.* modules
         run: |
+          echo "Running scripts/debug_routes.py (SOURCE_DIR=${SOURCE_DIR})"
           if [ -f scripts/debug_routes.py ]; then
             python3 -u scripts/debug_routes.py || true
           else
-            echo "debug_routes.py missing"
+            echo "scripts/debug_routes.py missing; skipping debug"
           fi
         shell: bash
 
-      - name: Run CI runner (generate collection)
+      - name: Debug LLM secrets & gateway (shell-only, no python)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          QBURST_GATEWAY: ${{ secrets.QBURST_GATEWAY }}
+        run: |
+          echo "DEBUG: masked view of secrets & gateway (shell-only)"
+
+          if [ -n "$OPENAI_API_KEY" ]; then
+            prefix="${OPENAI_API_KEY:0:6}"
+            len=$(printf '%s' "$OPENAI_API_KEY" | wc -c)
+            echo "OPENAI_API_KEY present - prefix='${prefix}...' length=${len}"
+          else
+            echo "OPENAI_API_KEY not present"
+          fi
+
+          if [ -n "$QBURST_GATEWAY" ]; then
+            gwlen=$(printf '%s' "$QBURST_GATEWAY" | wc -c)
+            echo "QBURST_GATEWAY length=${gwlen}"
+            echo "QBURST_GATEWAY hex (hexdump -C first 64 bytes):"
+            printf '%s' "$QBURST_GATEWAY" | head -c 64 | hexdump -C -v || true
+            echo "QBURST_GATEWAY displayed (raw):"
+            printf '%s\n' "$QBURST_GATEWAY" || true
+          else
+            echo "QBURST_GATEWAY not present"
+          fi
+
+          # quick network check (HEAD request); will print response headers or an error
+          if command -v curl >/dev/null 2>&1; then
+            echo "curl -I to gateway (first 12 lines):"
+            curl -sS -I --max-time 8 "$QBURST_GATEWAY" 2>&1 | sed -n '1,12p' || echo "curl failed (network or invalid URL)"
+          else
+            echo "curl not installed on runner"
+          fi
+        shell: bash
+
+      # optionally start backend in-runner (uncomment if you need local server)
+      # - name: Start backend (optional)
+      #   run: |
+      #     python3 -m pip install -r requirements.txt || true
+      #     nohup python3 backend/sample_src_app.py > backend.log 2>&1 &
+      #     for i in $(seq 1 12); do
+      #       if curl -sS http://127.0.0.1:5000/ >/dev/null 2>&1; then
+      #         echo "server up"
+      #         break
+      #       fi
+      #       echo "waiting for server..."
+      #       sleep 5
+      #     done
+      #   shell: bash
+
+      - name: Run CI runner (generate collection & divergences)
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           API_KEY: ${{ secrets.OPENAI_API_KEY }}
           QBURST_GATEWAY: ${{ secrets.QBURST_GATEWAY }}
         run: |
           mkdir -p "${OUTPUT_DIR}"
-          python3 -u ci_runner.py \
-            --source-dir "${SOURCE_DIR}" \
-            --use-llm \
-            --gateway-url "${QBURST_GATEWAY}" \
-            --output-dir "${OUTPUT_DIR}"
+          # unbuffered for real-time logs
+          python3 -u ci_runner.py --source-dir "${SOURCE_DIR}" --use-llm --gateway-url "${QBURST_GATEWAY}" --output-dir "${OUTPUT_DIR}"
         shell: bash
 
       - name: Show generated output files
         run: |
+          echo "Contents of ${OUTPUT_DIR}:"
           ls -la "${OUTPUT_DIR}" || true
           if [ -f "${OUTPUT_DIR}/postman_collection.json" ]; then
-            head -n 120 "${OUTPUT_DIR}/postman_collection.json"
+            echo "postman_collection.json preview (first 120 lines):"
+            head -n 120 "${OUTPUT_DIR}/postman_collection.json" || true
+          else
+            echo "postman_collection.json not found"
           fi
         shell: bash
 
-      #########################################################################
-      # HYPEREXECUTE DIRECT UPLOAD (NO PYTHON INLINE)
-      #########################################################################
-
-      - name: Run collection on HyperExecute
+      - name: Run newman on generated collection
         env:
-          LT_USERNAME: ${{ secrets.LT_USERNAME }}
-          LT_ACCESS_KEY: ${{ secrets.LT_ACCESS_KEY }}
-          HYPEREXECUTE_PROJECT: ${{ secrets.HYPEREXECUTE_PROJECT }}
           BASE_URL: ${{ secrets.BASE_URL }}
         run: |
-          set -euo pipefail
-
           COLLECTION="${OUTPUT_DIR}/postman_collection.json"
-          if [ ! -f "$COLLECTION" ]; then
-            echo "postman_collection.json not found"
-            exit 0
+          mkdir -p newman-reports
+          if [ -f "$COLLECTION" ]; then
+            # use locally installed newman via npx
+            npx newman run "$COLLECTION" --env-var "base_url=${BASE_URL}" \
+              --reporters cli,html,junit --reporter-junit-export newman-reports/junit.xml --reporter-html-export newman-reports/report.html || true
+          else
+            echo "No collection found at $COLLECTION — skipping newman"
           fi
-
-          # Create base64 string (safe for JSON)
-          COLLECTION_B64=$(base64 -w 0 "$COLLECTION")
-
-          # Install jq if missing
-          sudo apt-get update -y >/dev/null 2>&1
-          sudo apt-get install -y jq >/dev/null 2>&1
-
-          # Trigger HyperExecute
-          TRIGGER_RESPONSE=$(curl -s -u "${LT_USERNAME}:${LT_ACCESS_KEY}" \
-            -H "Content-Type: application/json" \
-            -X POST "https://hyperexecute.lambdatest.com/api/v1/runs" \
-            -d "$(jq -n \
-              --arg project "${HYPEREXECUTE_PROJECT}" \
-              --arg collection "${COLLECTION_B64}" \
-              --arg base "${BASE_URL}" \
-              '{project:$project, collection_base64:$collection, env:{base_url:$base}, concurrency:3}'
-            )")
-
-          echo "$TRIGGER_RESPONSE" > hyperexecute-trigger.json
-          cat hyperexecute-trigger.json | jq .
-
-          RUN_ID=$(cat hyperexecute-trigger.json | jq -r '.runId // .id // ""')
-          DASHBOARD_URL=$(cat hyperexecute-trigger.json | jq -r '.dashboardUrl // .reportUrl // ""')
-
-          echo "RUN_ID=$RUN_ID"
-          echo "DASHBOARD_URL=$DASHBOARD_URL"
-
-          # If no run ID, stop
-          if [ -z "$RUN_ID" ]; then
-            echo "No RUN_ID returned. Cannot poll."
-            echo "DASHBOARD_URL=${DASHBOARD_URL}" > hyperexecute-metadata.env
-            echo "RUN_ID=" >> hyperexecute-metadata.env
-            exit 0
-          fi
-
-          # Poll run status
-          MAX_TRIES=60
-          SLEEP_SECONDS=20
-
-          for i in $(seq 1 $MAX_TRIES); do
-            STATUS_JSON=$(curl -s -u "${LT_USERNAME}:${LT_ACCESS_KEY}" \
-              "https://hyperexecute.lambdatest.com/api/v1/runs/${RUN_ID}/status")
-
-            STATUS=$(echo "$STATUS_JSON" | jq -r '.status // ""')
-
-            echo "Attempt $i - Status = $STATUS"
-
-            if [ "$STATUS" = "COMPLETED" ] || [ "$STATUS" = "FINISHED" ] || [ "$STATUS" = "SUCCESS" ]; then
-              break
-            fi
-
-            if [ "$STATUS" = "FAILED" ] || [ "$STATUS" = "ERROR" ]; then
-              break
-            fi
-
-            sleep $SLEEP_SECONDS
-          done
-
-          # Download report
-          curl -s -u "${LT_USERNAME}:${LT_ACCESS_KEY}" \
-            -o hyperexecute-report.zip \
-            "https://hyperexecute.lambdatest.com/api/v1/runs/${RUN_ID}/report" || true
-
-          echo "DASHBOARD_URL=${DASHBOARD_URL}" > hyperexecute-metadata.env
-          echo "RUN_ID=${RUN_ID}" >> hyperexecute-metadata.env
+          ls -la newman-reports || true
         shell: bash
 
-
-      - name: Upload artifacts
+      - name: Upload artifacts (postman collection, divergence report, newman reports)
         uses: actions/upload-artifact@v4
         with:
           name: api-test-artifacts
@@ -181,34 +165,4 @@ jobs:
             output/postman_collection.json
             output/divergence_report.json
             output/llm_error.log
-            hyperexecute-trigger.json
-            hyperexecute-metadata.env
-            hyperexecute-report.zip
-
-      - name: Comment PR with dashboard link
-        if: ${{ github.event_name == 'pull_request' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [ -f hyperexecute-trigger.json ]; then
-            DASHBOARD_URL=$(jq -r '.dashboardUrl // .reportUrl // ""' hyperexecute-trigger.json)
-            RUN_ID=$(jq -r '.runId // .id // ""' hyperexecute-trigger.json)
-          fi
-
-          if [ -z "$DASHBOARD_URL" ] && [ -n "$RUN_ID" ]; then
-            DASHBOARD_URL="https://hyperexecute.lambdatest.com/runs/${RUN_ID}"
-          fi
-
-          if [ -n "$DASHBOARD_URL" ]; then
-            PR=${{ github.event.pull_request.number }}
-            COMMENT="HyperExecute Test Run Completed. Dashboard: ${DASHBOARD_URL}"
-            jq -n --arg body "$COMMENT" '{body:$body}' |
-              curl -s -X POST \
-                -H "Authorization: token ${GH_TOKEN}" \
-                -H "Content-Type: application/json" \
-                "https://api.github.com/repos/${{ github.repository }}/issues/${PR}/comments" \
-                -d @-
-          else
-            echo "No dashboard URL to post."
-          fi
-        shell: bash
+            newman-reports/**
