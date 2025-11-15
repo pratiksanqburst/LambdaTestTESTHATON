@@ -29,6 +29,13 @@ def login(email, password):
     print("Login:", resp.status_code, resp.json())
     return resp
 
+def login(email, password):
+    url = f"{BASE_URL}/login"
+    data = {"email": email, "password": password}
+    resp = requests.post(url, json=data)
+    print("Login:", resp.status_code, resp.json())
+    return resp
+
 if __name__ == "__main__":
     # example calls
     list_users(page=1)
