@@ -3,9 +3,9 @@ name: CI - API divergence + generated tests (no inline Python)
 on:
   workflow_dispatch: {}
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 permissions:
   contents: read
@@ -23,7 +23,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Ensure Python can import local `src` package
       - name: Add workspace to PYTHONPATH
         run: echo "PYTHONPATH=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
 
@@ -52,101 +51,46 @@ jobs:
           python3 -m pip install pyyaml openai || true
         shell: bash
 
-      - name: Install Newman (local)
-        run: |
-          npm install newman newman-reporter-html
+      - name: Install Newman
+        run: npm install newman newman-reporter-html
         shell: bash
 
-      - name: Debug list discovered routes (script)
-        # script should exist at scripts/debug_routes.py and import src.* modules
+      - name: Debug routes
         run: |
-          echo "Running scripts/debug_routes.py (SOURCE_DIR=${SOURCE_DIR})"
           if [ -f scripts/debug_routes.py ]; then
             python3 -u scripts/debug_routes.py || true
           else
-            echo "scripts/debug_routes.py missing; skipping debug"
+            echo "debug_routes.py missing"
           fi
         shell: bash
 
-      - name: Debug LLM secrets & gateway (shell-only, no python)
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          QBURST_GATEWAY: ${{ secrets.QBURST_GATEWAY }}
-        run: |
-          echo "DEBUG: masked view of secrets & gateway (shell-only)"
-
-          if [ -n "$OPENAI_API_KEY" ]; then
-            prefix="${OPENAI_API_KEY:0:6}"
-            len=$(printf '%s' "$OPENAI_API_KEY" | wc -c)
-            echo "OPENAI_API_KEY present - prefix='${prefix}...' length=${len}"
-          else
-            echo "OPENAI_API_KEY not present"
-          fi
-
-          if [ -n "$QBURST_GATEWAY" ]; then
-            gwlen=$(printf '%s' "$QBURST_GATEWAY" | wc -c)
-            echo "QBURST_GATEWAY length=${gwlen}"
-            echo "QBURST_GATEWAY hex (hexdump -C first 64 bytes):"
-            printf '%s' "$QBURST_GATEWAY" | head -c 64 | hexdump -C -v || true
-            echo "QBURST_GATEWAY displayed (raw):"
-            printf '%s\n' "$QBURST_GATEWAY" || true
-          else
-            echo "QBURST_GATEWAY not present"
-          fi
-
-          # quick network check (HEAD request); will print response headers or an error
-          if command -v curl >/dev/null 2>&1; then
-            echo "curl -I to gateway (first 12 lines):"
-            curl -sS -I --max-time 8 "$QBURST_GATEWAY" 2>&1 | sed -n '1,12p' || echo "curl failed (network or invalid URL)"
-          else
-            echo "curl not installed on runner"
-          fi
-        shell: bash
-
-      # optionally start backend in-runner (uncomment if you need local server)
-      # - name: Start backend (optional)
-      #   run: |
-      #     python3 -m pip install -r requirements.txt || true
-      #     nohup python3 backend/sample_src_app.py > backend.log 2>&1 &
-      #     for i in $(seq 1 12); do
-      #       if curl -sS http://127.0.0.1:5000/ >/dev/null 2>&1; then
-      #         echo "server up"
-      #         break
-      #       fi
-      #       echo "waiting for server..."
-      #       sleep 5
-      #     done
-      #   shell: bash
-
-      - name: Run CI runner (generate collection & divergences)
+      - name: Run CI runner (generate collection)
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           API_KEY: ${{ secrets.OPENAI_API_KEY }}
           QBURST_GATEWAY: ${{ secrets.QBURST_GATEWAY }}
         run: |
           mkdir -p "${OUTPUT_DIR}"
-          # unbuffered for real-time logs
-          python3 -u ci_runner.py --source-dir "${SOURCE_DIR}" --use-llm --gateway-url "${QBURST_GATEWAY}" --output-dir "${OUTPUT_DIR}"
+          python3 -u ci_runner.py \
+            --source-dir "${SOURCE_DIR}" \
+            --use-llm \
+            --gateway-url "${QBURST_GATEWAY}" \
+            --output-dir "${OUTPUT_DIR}"
         shell: bash
 
       - name: Show generated output files
         run: |
-          echo "Contents of ${OUTPUT_DIR}:"
           ls -la "${OUTPUT_DIR}" || true
           if [ -f "${OUTPUT_DIR}/postman_collection.json" ]; then
-            echo "postman_collection.json preview (first 120 lines):"
-            head -n 120 "${OUTPUT_DIR}/postman_collection.json" || true
-          else
-            echo "postman_collection.json not found"
+            head -n 120 "${OUTPUT_DIR}/postman_collection.json"
           fi
         shell: bash
 
-      ####################################################################
-      # REPLACED: Run newman on generated collection (we now push to HyperExecute)
-      # This step triggers HyperExecute CLI, polls for result, downloads report.
-      # Ensure the repo secrets LT_USERNAME and LT_ACCESS_KEY are set.
-      ####################################################################
-      - name: Run collection on HyperExecute (CLI) and fetch results
+      #########################################################################
+      # HYPEREXECUTE DIRECT UPLOAD (NO PYTHON INLINE)
+      #########################################################################
+
+      - name: Run collection on HyperExecute
         env:
           LT_USERNAME: ${{ secrets.LT_USERNAME }}
           LT_ACCESS_KEY: ${{ secrets.LT_ACCESS_KEY }}
@@ -156,86 +100,80 @@ jobs:
           set -euo pipefail
 
           COLLECTION="${OUTPUT_DIR}/postman_collection.json"
-          echo "==> HyperExecute run: check collection at $COLLECTION"
-
           if [ ! -f "$COLLECTION" ]; then
-            echo "No collection found - skipping HyperExecute run"
+            echo "postman_collection.json not found"
             exit 0
           fi
 
-          # ---- Install HyperExecute CLI (example) ----
-          # Replace with actual package/install from your HyperExecute docs if different
-          echo "Installing HyperExecute CLI (example package: @lambdatest/hyperexecute)..."
-          npm install -g @lambdatest/hyperexecute || true
+          # Create base64 string (safe for JSON)
+          COLLECTION_B64=$(base64 -w 0 "$COLLECTION")
 
-          # ---- Trigger HyperExecute run via CLI ----
-          # Replace 'hyperexecute run' + flags with the actual CLI command & flags from your account docs if different
-          echo "Triggering HyperExecute run..."
-          hyperexecute run \
-            --collection "$COLLECTION" \
-            --env "{\"base_url\":\"${BASE_URL}\"}" \
-            --project "${HYPEREXECUTE_PROJECT:-default}" \
-            --username "${LT_USERNAME}" \
-            --accessKey "${LT_ACCESS_KEY}" \
-            --output hyperexecute-output.json \
-            || true
+          # Install jq if missing
+          sudo apt-get update -y >/dev/null 2>&1
+          sudo apt-get install -y jq >/dev/null 2>&1
 
-          echo "=== CLI output summary ==="
-          if [ -f hyperexecute-output.json ]; then
-            jq -C . hyperexecute-output.json || cat hyperexecute-output.json || true
-          else
-            echo "hyperexecute-output.json not found; check CLI output above"
+          # Trigger HyperExecute
+          TRIGGER_RESPONSE=$(curl -s -u "${LT_USERNAME}:${LT_ACCESS_KEY}" \
+            -H "Content-Type: application/json" \
+            -X POST "https://hyperexecute.lambdatest.com/api/v1/runs" \
+            -d "$(jq -n \
+              --arg project "${HYPEREXECUTE_PROJECT}" \
+              --arg collection "${COLLECTION_B64}" \
+              --arg base "${BASE_URL}" \
+              '{project:$project, collection_base64:$collection, env:{base_url:$base}, concurrency:3}'
+            )")
+
+          echo "$TRIGGER_RESPONSE" > hyperexecute-trigger.json
+          cat hyperexecute-trigger.json | jq .
+
+          RUN_ID=$(cat hyperexecute-trigger.json | jq -r '.runId // .id // ""')
+          DASHBOARD_URL=$(cat hyperexecute-trigger.json | jq -r '.dashboardUrl // .reportUrl // ""')
+
+          echo "RUN_ID=$RUN_ID"
+          echo "DASHBOARD_URL=$DASHBOARD_URL"
+
+          # If no run ID, stop
+          if [ -z "$RUN_ID" ]; then
+            echo "No RUN_ID returned. Cannot poll."
+            echo "DASHBOARD_URL=${DASHBOARD_URL}" > hyperexecute-metadata.env
+            echo "RUN_ID=" >> hyperexecute-metadata.env
+            exit 0
           fi
 
-          # ---- Extract run id and dashboard url if present ----
-          RUN_ID=$(jq -r '.runId // .id // ""' hyperexecute-output.json 2>/dev/null || echo "")
-          DASHBOARD_URL=$(jq -r '.dashboardUrl // .reportUrl // ""' hyperexecute-output.json 2>/dev/null || echo "")
+          # Poll run status
+          MAX_TRIES=60
+          SLEEP_SECONDS=20
 
-          echo "Run ID: ${RUN_ID:-<none>}"
-          echo "Dashboard URL: ${DASHBOARD_URL:-<none>}"
+          for i in $(seq 1 $MAX_TRIES); do
+            STATUS_JSON=$(curl -s -u "${LT_USERNAME}:${LT_ACCESS_KEY}" \
+              "https://hyperexecute.lambdatest.com/api/v1/runs/${RUN_ID}/status")
 
-          # ---- Poll for run completion (if a run id exists) ----
-          if [ -n "$RUN_ID" ]; then
-            echo "Polling HyperExecute status for runId=$RUN_ID..."
-            MAX_TRIES=60       # ~20 minutes with SLEEP_SECONDS=20
-            SLEEP_SECONDS=20
-            for i in $(seq 1 $MAX_TRIES); do
-              STATUS_JSON=$(curl -s -u "${LT_USERNAME}:${LT_ACCESS_KEY}" "https://hyperexecute.lambdatest.com/api/v1/runs/${RUN_ID}/status" || echo "")
-              STATUS=$(echo "$STATUS_JSON" | jq -r '.status // ""' 2>/dev/null || echo "")
-              echo "Attempt $i/$MAX_TRIES - status=${STATUS:-UNKNOWN}"
-              if [ "$STATUS" = "COMPLETED" ] || [ "$STATUS" = "FINISHED" ] || [ "$STATUS" = "SUCCESS" ]; then
-                echo "Run finished with status: $STATUS"
-                break
-              elif [ "$STATUS" = "FAILED" ] || [ "$STATUS" = "ERROR" ]; then
-                echo "Run ended with failure status: $STATUS"
-                break
-              fi
-              sleep $SLEEP_SECONDS
-            done
-          else
-            echo "No RUN_ID available - skipping status poll"
-          fi
+            STATUS=$(echo "$STATUS_JSON" | jq -r '.status // ""')
 
-          # ---- Try to download report (if supported by your API) ----
-          if [ -n "$RUN_ID" ]; then
-            echo "Attempting to download run report for runId=${RUN_ID}..."
-            curl -s -u "${LT_USERNAME}:${LT_ACCESS_KEY}" "https://hyperexecute.lambdatest.com/api/v1/runs/${RUN_ID}/report" -o hyperexecute-report.zip || true
-            if [ -f hyperexecute-report.zip ]; then
-              echo "Downloaded hyperexecute-report.zip"
-              ls -lh hyperexecute-report.zip || true
-            else
-              echo "No hyperexecute-report.zip found"
+            echo "Attempt $i - Status = $STATUS"
+
+            if [ "$STATUS" = "COMPLETED" ] || [ "$STATUS" = "FINISHED" ] || [ "$STATUS" = "SUCCESS" ]; then
+              break
             fi
-          fi
 
-          # ---- Save metadata for upload ----
-          echo "DASHBOARD_URL=${DASHBOARD_URL:-}" > hyperexecute-metadata.env || true
-          echo "RUN_ID=${RUN_ID:-}" >> hyperexecute-metadata.env || true
-          echo "HyperExecute step complete."
+            if [ "$STATUS" = "FAILED" ] || [ "$STATUS" = "ERROR" ]; then
+              break
+            fi
 
+            sleep $SLEEP_SECONDS
+          done
+
+          # Download report
+          curl -s -u "${LT_USERNAME}:${LT_ACCESS_KEY}" \
+            -o hyperexecute-report.zip \
+            "https://hyperexecute.lambdatest.com/api/v1/runs/${RUN_ID}/report" || true
+
+          echo "DASHBOARD_URL=${DASHBOARD_URL}" > hyperexecute-metadata.env
+          echo "RUN_ID=${RUN_ID}" >> hyperexecute-metadata.env
         shell: bash
 
-      - name: Upload artifacts (HyperExecute + generated outputs)
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: api-test-artifacts
@@ -243,30 +181,34 @@ jobs:
             output/postman_collection.json
             output/divergence_report.json
             output/llm_error.log
-            hyperexecute-output.json
+            hyperexecute-trigger.json
             hyperexecute-metadata.env
             hyperexecute-report.zip
 
-      - name: Comment PR with HyperExecute dashboard link
+      - name: Comment PR with dashboard link
         if: ${{ github.event_name == 'pull_request' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Extract dashboard link from hyperexecute-output.json or fallback to constructed URL
-          DASHBOARD_URL=$(jq -r '.dashboardUrl // .reportUrl // ""' hyperexecute-output.json 2>/dev/null || echo "")
-          RUN_ID=$(jq -r '.runId // .id // ""' hyperexecute-output.json 2>/dev/null || echo "")
+          if [ -f hyperexecute-trigger.json ]; then
+            DASHBOARD_URL=$(jq -r '.dashboardUrl // .reportUrl // ""' hyperexecute-trigger.json)
+            RUN_ID=$(jq -r '.runId // .id // ""' hyperexecute-trigger.json)
+          fi
+
           if [ -z "$DASHBOARD_URL" ] && [ -n "$RUN_ID" ]; then
             DASHBOARD_URL="https://hyperexecute.lambdatest.com/runs/${RUN_ID}"
           fi
 
           if [ -n "$DASHBOARD_URL" ]; then
-            PR_NUMBER=${{ github.event.pull_request.number }}
-            BODY=" HyperExecute run completed. Dashboard: ${DASHBOARD_URL}"
-            echo "Posting comment to PR #${PR_NUMBER}"
-            # use jq to safely produce JSON body
-            jq -n --arg body "$BODY" '{body:$body}' | curl -s -X POST -H "Authorization: token ${GH_TOKEN}" -H "Content-Type: application/json" \
-              "https://api.github.com/repos/${{ github.repository }}/issues/${PR_NUMBER}/comments" -d @-
+            PR=${{ github.event.pull_request.number }}
+            COMMENT="HyperExecute Test Run Completed. Dashboard: ${DASHBOARD_URL}"
+            jq -n --arg body "$COMMENT" '{body:$body}' |
+              curl -s -X POST \
+                -H "Authorization: token ${GH_TOKEN}" \
+                -H "Content-Type: application/json" \
+                "https://api.github.com/repos/${{ github.repository }}/issues/${PR}/comments" \
+                -d @-
           else
-            echo "No dashboard URL present; skipping PR comment"
+            echo "No dashboard URL to post."
           fi
         shell: bash
