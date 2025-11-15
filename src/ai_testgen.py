@@ -151,22 +151,100 @@ def _call_llm_generate(swagger: Dict[str, Any], divergences: List[Dict[str, Any]
 
     # Large, explicit system prompt based on user instruction
     system_prompt = (
-        "You are an expert QA automation engineer and API testing specialist\n\n"
-        "You are given two inputs:\n"
-        "1. A Swagger / OpenAPI specification (as JSON).\n"
-        "2. A divergence report listing mismatches between the Swagger spec and the implementation source code.\n\n"
-        "Your task: For EACH divergence issue, produce a Postman Collection (v2.1) where each divergence is a dedicated folder.\n"
-        "Within each folder generate at minimum:\n"
-        "- Positive test(s) (expected behavior based on the Swagger)\n"
-        "- Negative test(s) (invalid inputs, missing params, unauthorized, wrong formats)\n"
-        "- Divergence-focused test(s) that directly test the described mismatch\n\n"
-        "MANDATORY:\n"
-        "- Use {{base_url}} for the host in all requests.\n"
-        "- Include request method, URL path, headers, and body when applicable.\n"
-        "- Each test must include Postman 'test' event JS that asserts status codes and relevant response fields.\n"
-        "- If a response provides values used later (token, id), extract them into environment variables using pm.environment.set and use them in dependent requests.\n"
-        "- Output only valid JSON representing a Postman Collection v2.1 (no extra text).\n\n"
-        "Return: a JSON object compliant with Postman Collection v2.1 schema containing one folder per divergence and the required test cases.\n"
+        '''You are an expert QA automation engineer and API testing specialist.
+
+You are given two inputs:
+1. A Swagger / OpenAPI specification (JSON or YAML converted to JSON).
+2. A divergence report listing mismatches between the Swagger specification and the implementation source code.
+
+Your task:
+Generate a valid **Postman Collection (v2.1)** named:
+"AI Generated API Divergence Test Suite"
+
+VARIABLES REQUIREMENT (MANDATORY):
+The Postman JSON MUST include the following variables in the "variable" section:
+
+[
+  { "key": "base_url", "value": "<value extracted from Swagger servers[0].url>" },
+  { "key": "api_key", "value": "reqres-free-v1" }
+]
+
+These variables MUST exist in the final output.
+
+STRUCTURE RULES:
+For EACH divergence issue, generate ONE folder inside "item".
+Each folder MUST ALWAYS contain:
+  1. Positive Test Case(s)
+  2. Negative Test Case(s)
+  3. Divergence Test Case(s)
+No folder should ever omit any of these categories.
+
+REQUEST GENERATION RULES:
+Every request MUST include:
+"name" — clear descriptive title
+"request" object containing:
+    - "method"
+    - "url" using "{{base_url}}"
+    - "header" containing BOTH of these mandatory entries:
+
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      },
+      {
+        "key": "x-api-key",
+        "value": "{{api_key}}"
+      }
+
+    These two headers MUST be present in **every** test case without exception.
+
+    - "body" (for POST, PUT, PATCH) in raw JSON mode when needed
+
+AUTH & VALUE PROPAGATION RULES:
+If a token or ID is returned:
+Extract it:
+      pm.environment.set("token", pm.response.json().token);
+      pm.environment.set("created_id", pm.response.json().id);
+
+Use it in subsequent tests:
+      Authorization: Bearer {{token}}
+      URL paths using {{created_id}}
+
+TEST SCRIPT RULES:
+Each request MUST contain at least one "event" with a "test" script:
+Validate HTTP status
+Validate presence/absence of fields
+Validate schema-like structure where possible
+Validate divergence behavior:
+    - Missing endpoints → expect 404
+    - Extra fields in implementation → assert mismatch
+    - Wrong status code according to Swagger → assert mismatch
+    - Schema divergence → expect 400 or failed validation
+No request may be generated without a test script.
+
+BASE URL RULE:
+Extract base URL from Swagger (servers[0].url)
+Add it to the Postman collection variables as:
+      { "key": "base_url", "value": "<swagger-url>" }
+All requests MUST use "{{base_url}}" as the host.
+
+OUTPUT RULES:
+Output MUST be strict JSON only.
+NO markdown, NO explanation text, NO code fences.
+Must fully comply with:
+      https://schema.getpostman.com/json/collection/v2.1.0/collection.json
+The output must be importable and executable in Postman and Newman without manual changes.
+
+GOAL:
+Generate a complete, executable Postman test suite that:
+Properly structures all folders and test cases
+Validates divergence issues
+Includes mandatory API key header for EVERY request
+Includes “base_url” and “api_key” variables in the Postman JSON
+Includes working Postman test scripts
+Supports authentication/token chaining and ID reuse
+Works end-to-end in CI/CD using Newman
+Requires zero modifications after generation.'''
     )
 
     payload = {"swagger": swagger, "divergences": divergences}
