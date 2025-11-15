@@ -1,7 +1,6 @@
 {
   "info": {
-    "_postman_id": "12345-67890-abcdef",
-    "name": "Sample API Tests",
+    "name": "Divergence Test Collection",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -9,34 +8,52 @@
       "name": "GET /items/{item_id} - Endpoint missing in source code",
       "item": [
         {
-          "name": "Positive Test - Get Item",
+          "name": "Positive Test",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{base_url}}/items/1",
-            "description": "Test to get an item by ID."
+            "url": {
+              "raw": "{{base_url}}/items/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "items",
+                "1"
+              ]
+            }
           },
           "response": []
         },
         {
-          "name": "Negative Test - Get Item Not Found",
+          "name": "Negative Test - Not Found",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{base_url}}/items/9999",
-            "description": "Test to get an item that does not exist."
+            "url": {
+              "raw": "{{base_url}}/items/9999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "items",
+                "9999"
+              ]
+            }
           },
-          "response": []
-        },
-        {
-          "name": "Divergence Test - Missing Endpoint",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{base_url}}/items/1",
-            "description": "Test to confirm the endpoint is missing in the source code."
-          },
-          "response": []
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -44,7 +61,7 @@
       "name": "POST /items - Schema validation needed",
       "item": [
         {
-          "name": "Positive Test - Create Item",
+          "name": "Positive Test - Valid Schema",
           "request": {
             "method": "POST",
             "header": [
@@ -53,17 +70,36 @@
                 "value": "application/json"
               }
             ],
+            "url": {
+              "raw": "{{base_url}}/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "items"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\"name\": \"New Item\"}"
-            },
-            "url": "{{base_url}}/items",
-            "description": "Test to create a new item with valid schema."
+            }
           },
-          "response": []
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Negative Test - Create Item Missing Name",
+          "name": "Negative Test - Invalid Schema",
           "request": {
             "method": "POST",
             "header": [
@@ -72,33 +108,68 @@
                 "value": "application/json"
               }
             ],
+            "url": {
+              "raw": "{{base_url}}/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "items"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{}"
-            },
-            "url": "{{base_url}}/items",
-            "description": "Test to create an item without the required 'name' field."
+            }
           },
-          "response": []
-        },
-        {
-          "name": "Divergence Test - Invalid Schema",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
               }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"name\": 123}"
-            },
-            "url": "{{base_url}}/items",
-            "description": "Test to create an item with an invalid schema (name is not a string)."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "GET /items/<int:item_id> - Extra route not in Swagger",
+      "item": [
+        {
+          "name": "Negative Test - Invalid Route",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/items/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "items",
+                "1"
+              ]
+            }
           },
-          "response": []
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -110,70 +181,139 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{base_url}}/items",
-            "description": "Test to list all items."
+            "url": {
+              "raw": "{{base_url}}/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "items"
+              ]
+            }
           },
-          "response": []
-        },
-        {
-          "name": "Negative Test - List Items Unauthorized",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer invalid_token"
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
               }
-            ],
-            "url": "{{base_url}}/items",
-            "description": "Test to list items with unauthorized access."
-          },
-          "response": []
+            }
+          ]
         },
         {
-          "name": "Divergence Test - Check Extra Response 201",
+          "name": "Negative Test - Unexpected Response",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{base_url}}/items",
-            "description": "Test to confirm if the response includes an unexpected 201 status."
+            "url": {
+              "raw": "{{base_url}}/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "items"
+              ]
+            }
           },
-          "response": []
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is not 201', function () {",
+                  "    pm.response.to.not.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     {
-      "name": "GET /items/<int:item_id> - Extra route not in Swagger",
+      "name": "POST /items - Extra responses: ['200']",
       "item": [
         {
-          "name": "Positive Test - Get Item by ID",
+          "name": "Positive Test - Create Item",
           "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{base_url}}/items/1",
-            "description": "Test to get an item by ID using an extra route."
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Another Item\"}"
+            }
           },
-          "response": []
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Negative Test - Get Item Invalid ID",
+          "name": "Negative Test - Unexpected Response",
           "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{base_url}}/items/abc",
-            "description": "Test to get an item with an invalid ID format."
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Another Item\"}"
+            }
           },
-          "response": []
-        },
-        {
-          "name": "Divergence Test - Test Extra Route",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{base_url}}/items/1",
-            "description": "Test to confirm the behavior of the extra route not defined in Swagger."
-          },
-          "response": []
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is not 200', function () {",
+                  "    pm.response.to.not.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
         }
       ]
     }
